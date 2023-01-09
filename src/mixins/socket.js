@@ -34,6 +34,7 @@ export default {
             allowLoginDialog: false,        // Allowed to show login dialog, but "loggedIn" have to be true too. This exists because prevent the login dialog show 0.1s in first before the socket server auth-ed.
             loggedIn: false,
             monitorList: { },
+            selectedDevice: "",
             maintenanceList: { },
             heartbeatList: { },
             importantHeartbeatList: { },

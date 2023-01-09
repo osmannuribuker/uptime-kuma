@@ -35,19 +35,24 @@
                     <thead>
                         <tr>
                             <th>{{ $t("Name") }}</th>
+                            <th>{{ $t("Tag") }}</th>
                             <th>{{ $t("Status") }}</th>
                             <th>{{ $t("DateTime") }}</th>
                             <th>{{ $t("Message") }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="(beat, index) in displayedRecords" :key="index" :class="{ 'shadow-box': $root.windowWidth <= 550}">
-                            <td><router-link :to="`/dashboard/${beat.monitorID}`">{{ beat.name }}</router-link></td>
-                            <td><Status :status="beat.status" /></td>
-                            <td :class="{ 'border-0':! beat.msg}"><Datetime :value="beat.time" /></td>
-                            <td class="border-0">{{ beat.msg }}</td>
+                        <tr v-for="(item, index) in displayedRecords" :key="index" :class="{ 'shadow-box': $root.windowWidth <= 550}">
+                            <td><router-link :to="`/dashboard/${item.id}`">{{ item.name }}</router-link></td>
+                            <td>
+                                <div class="tags">
+                                    <Badge v-for="tag in item.tags" :key="tag" :item="tag" :size="'sm'"/>
+                                </div>
+                            </td>
+                            <td><Status :status="item.beat[0].status" /></td>
+                            <td :class="{ 'border-0':! item.beat[0].msg}"><Datetime :value="item.beat[0].time" /></td>
+                            <td class="border-0">{{ item.beat[0].msg }}</td>
                         </tr>
-
                         <tr v-if="importantHeartBeatList.length === 0">
                             <td colspan="4">
                                 {{ $t("No important events") }}
@@ -73,6 +78,7 @@
 <script>
 import Status from "../components/Status.vue";
 import Datetime from "../components/Datetime.vue";
+import Badge from "../components/Badge.vue";
 import Pagination from "v-pagination-3";
 
 export default {
@@ -80,6 +86,7 @@ export default {
         Datetime,
         Status,
         Pagination,
+        Badge,
     },
     data() {
         return {
@@ -90,6 +97,7 @@ export default {
                 hideCount: true,
                 chunksNavigation: "scroll",
             },
+            filteredList: [],
         };
     },
     computed: {
@@ -97,9 +105,10 @@ export default {
         importantHeartBeatList() {
             let result = [];
 
-            for (let monitorID in this.$root.importantHeartbeatList) {
-                let list = this.$root.importantHeartbeatList[monitorID];
-                result = result.concat(list);
+            for (let monitorID in this.$root.monitorList) {
+                let list = this.$root.monitorList[monitorID];
+                let beat = this.$root.importantHeartbeatList[monitorID];
+                result = result.concat({...list, beat});
             }
 
             for (let beat of result) {
@@ -129,9 +138,13 @@ export default {
         },
 
         displayedRecords() {
-            const startIndex = this.perPage * (this.page - 1);
-            const endIndex = startIndex + this.perPage;
-            return this.heartBeatList.slice(startIndex, endIndex);
+            if (this.$root.selectedDevice !== "") {
+                const loweredSearchText = this.$root.selectedDevice.toLowerCase();
+                this.filteredList = this.heartBeatList.filter(monitor => {
+                    return monitor.name.toLowerCase().includes(loweredSearchText);
+                });
+            }
+            return this.filteredList;
         },
     },
 };

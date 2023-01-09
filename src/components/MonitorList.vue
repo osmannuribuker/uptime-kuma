@@ -19,28 +19,21 @@
                 {{ $t("No Monitors, please") }} <router-link to="/add">{{ $t("add one") }}</router-link>
             </div>
 
-            <router-link v-for="(item, index) in sortedMonitorList" :key="index" :to="monitorURL(item.id)" class="item" :class="{ 'disabled': ! item.active }">
+            <a v-for="(item, index) in sortedMonitorList" :key="index" @click="setSelectedDevice(item.name)" class="item" :class="{ 'disabled': ! item.active }">
                 <div class="row">
-                    <div class="col-9 col-md-8 small-padding" :class="{ 'monitor-item': $root.userHeartbeatBar == 'bottom' || $root.userHeartbeatBar == 'none' }">
+                    <div class="col-8 col-md-8 small-padding" :class="{ 'monitor-item': $root.userHeartbeatBar == 'bottom' || $root.userHeartbeatBar == 'none' }">
                         <div class="info">
-                            <Uptime :monitor="item" type="24" :pill="true" />
                             {{ item.name }}
                         </div>
-                        <div class="tags">
-                            <Tag v-for="tag in item.tags" :key="tag" :item="tag" :size="'sm'" />
-                        </div>
                     </div>
-                    <div v-show="$root.userHeartbeatBar == 'normal'" :key="$root.userHeartbeatBar" class="col-3 col-md-4">
-                        <HeartbeatBar size="small" :monitor-id="item.id" />
+                    <div class="col-2 col-md-2">
+                        <span class="badge rounded-pill bg-success">{{ item.upCount }}</span>
                     </div>
-                </div>
-
-                <div v-if="$root.userHeartbeatBar == 'bottom'" class="row">
-                    <div class="col-12 bottom-style">
-                        <HeartbeatBar size="small" :monitor-id="item.id" />
+                    <div class="col-2 col-md-2">
+                        <span class="badge rounded-pill bg-danger">{{ item.downCount }}</span>
                     </div>
                 </div>
-            </router-link>
+            </a>
         </div>
     </div>
 </template>
@@ -48,6 +41,7 @@
 <script>
 import HeartbeatBar from "../components/HeartbeatBar.vue";
 import Tag from "../components/Tag.vue";
+import Badge from "../components/Badge.vue";
 import Uptime from "../components/Uptime.vue";
 import { getMonitorRelativeURL } from "../util.ts";
 
@@ -56,6 +50,7 @@ export default {
         Uptime,
         HeartbeatBar,
         Tag,
+        Badge,
     },
     props: {
         /** Should the scrollbar be shown */
@@ -89,44 +84,28 @@ export default {
         },
 
         sortedMonitorList() {
-            let result = Object.values(this.$root.monitorList);
+            let keys  = Object.keys(this.$root.importantHeartbeatList);
+            let mList = keys.map(id => {
+                let data1 = this.$root.monitorList[id]
+                let beat = Object.values(this.$root.importantHeartbeatList[id])
+                return {...data1, status:beat[0].status}
+            })
+            mList = mList.map(r => {
+                let upCount = mList.filter(item => item.name === r.name && item.status === 1).length
+                let downCount = mList.filter(item => item.name === r.name && item.status === 0).length
+                return {...r, upCount, downCount}
+            })
 
-            result.sort((m1, m2) => {
-
-                if (m1.active !== m2.active) {
-                    if (m1.active === 0) {
-                        return 1;
-                    }
-
-                    if (m2.active === 0) {
-                        return -1;
-                    }
-                }
-
-                if (m1.weight !== m2.weight) {
-                    if (m1.weight > m2.weight) {
-                        return -1;
-                    }
-
-                    if (m1.weight < m2.weight) {
-                        return 1;
-                    }
-                }
-
-                return m1.name.localeCompare(m2.name);
-            });
+            let result = [...new Map(mList.map(item => [item["name"], {...item}])).values()];
 
             // Simple filter by search text
             // finds monitor name, tag name or tag value
             if (this.searchText !== "") {
                 const loweredSearchText = this.searchText.toLowerCase();
                 result = result.filter(monitor => {
-                    return monitor.name.toLowerCase().includes(loweredSearchText)
-                    || monitor.tags.find(tag => tag.name.toLowerCase().includes(loweredSearchText)
-                    || tag.value?.toLowerCase().includes(loweredSearchText));
+                    return monitor.name.toLowerCase().includes(loweredSearchText);
                 });
             }
-
             return result;
         },
     },
@@ -152,6 +131,10 @@ export default {
          */
         monitorURL(id) {
             return getMonitorRelativeURL(id);
+        },
+
+        setSelectedDevice(name) {
+            this.$root.selectedDevice = name;
         },
         /** Clear the search bar */
         clearSearchText() {
