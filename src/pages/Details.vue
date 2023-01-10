@@ -33,6 +33,9 @@
                     <button class="btn btn-danger" @click="deleteDialog">
                         <font-awesome-icon icon="trash" /> {{ $t("Delete") }}
                     </button>
+                    <button class="btn btn-normal" onclick="history.back()">
+                        <font-awesome-icon icon="arrow-alt-circle-left" /> {{ $t("Back") }}
+                    </button>
                 </div>
             </div>
 
