@@ -210,12 +210,12 @@
 
                     <div v-else-if="partialDown">
                         <font-awesome-icon icon="exclamation-circle" class="warning" />
-                        {{ $t("Partially Degraded Service") }}
+                        {{ $t("Some Systems are Down") }}
                     </div>
 
                     <div v-else-if="allDown">
                         <font-awesome-icon icon="times-circle" class="danger" />
-                        {{ $t("Degraded Service") }}
+                        {{ $t("All Systems are Down") }}
                     </div>
 
                     <div v-else-if="isMaintenance">
@@ -282,7 +282,7 @@
                 <Editable v-model="config.footerText" tag="div" :contenteditable="enableEditMode" :noNL="false" class="alert-heading p-2" />
 
                 <p v-if="config.showPoweredBy">
-                    {{ $t("Powered by") }} <a target="_blank" rel="noopener noreferrer" href="https://github.com/louislam/uptime-kuma">{{ $t("Uptime Kuma" ) }}</a>
+                    {{ $t("Powered by") }} <a target="_blank" rel="noopener noreferrer" href="https://www.cornell.com">{{ $t("Cornell" ) }}</a>
                 </p>
             </footer>
         </div>

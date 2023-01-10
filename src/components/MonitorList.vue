@@ -20,19 +20,21 @@
             </div>
 
             <a v-for="(item, index) in sortedMonitorList" :key="index" @click="setSelectedDevice(item.name)" class="item" :class="{ 'disabled': ! item.active }">
-                <div class="row">
-                    <div class="col-8 col-md-8 small-padding" :class="{ 'monitor-item': $root.userHeartbeatBar == 'bottom' || $root.userHeartbeatBar == 'none' }">
-                        <div class="info">
-                            {{ item.name }}
+                <router-link to="/dashboard">
+                    <div class="row">
+                        <div class="col-8 col-md-8 small-padding" :class="{ 'monitor-item': $root.userHeartbeatBar == 'bottom' || $root.userHeartbeatBar == 'none' }">
+                            <div class="info">
+                                {{ item.name }}
+                            </div>
+                        </div>
+                        <div class="col-2 col-md-2">
+                            <span class="badge rounded-pill bg-success">{{ item.upCount }}</span>
+                        </div>
+                        <div class="col-2 col-md-2">
+                            <span class="badge rounded-pill bg-danger">{{ item.downCount }}</span>
                         </div>
                     </div>
-                    <div class="col-2 col-md-2">
-                        <span class="badge rounded-pill bg-success">{{ item.upCount }}</span>
-                    </div>
-                    <div class="col-2 col-md-2">
-                        <span class="badge rounded-pill bg-danger">{{ item.downCount }}</span>
-                    </div>
-                </div>
+                </router-link>
             </a>
         </div>
     </div>

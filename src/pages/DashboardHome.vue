@@ -31,7 +31,8 @@
             </div>
 
             <div class="shadow-box table-shadow-box" style="overflow-x: hidden;">
-                <table class="table table-borderless table-hover">
+                <div v-if="$root.selectedDevice">
+                    <table class="table table-borderless table-hover">
                     <thead>
                         <tr>
                             <th>{{ $t("Name") }}</th>
@@ -60,6 +61,11 @@
                         </tr>
                     </tbody>
                 </table>
+                </div>
+                <div v-else>
+                    <p>Select system to see details.</p>
+                </div>
+
 
                 <div class="d-flex justify-content-center kuma_pagination">
                     <pagination
