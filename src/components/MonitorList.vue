@@ -43,7 +43,6 @@
 <script>
 import HeartbeatBar from "../components/HeartbeatBar.vue";
 import Tag from "../components/Tag.vue";
-import Badge from "../components/Badge.vue";
 import Uptime from "../components/Uptime.vue";
 import { getMonitorRelativeURL } from "../util.ts";
 
@@ -52,7 +51,6 @@ export default {
         Uptime,
         HeartbeatBar,
         Tag,
-        Badge,
     },
     props: {
         /** Should the scrollbar be shown */

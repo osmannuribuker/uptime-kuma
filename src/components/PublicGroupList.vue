@@ -9,12 +9,25 @@
         <template #item="group">
             <div class="mb-5 ">
                 <!-- Group Title -->
-                <h2 class="group-title">
-                    <font-awesome-icon v-if="editMode && showGroupDrag" icon="arrows-alt-v" class="action drag me-3" />
-                    <font-awesome-icon v-if="editMode" icon="times" class="action remove me-3" @click="removeGroup(group.index)" />
-                    <Editable v-model="group.element.name" :contenteditable="editMode" tag="span" />
-                </h2>
-
+                <div class="row">
+                    <div class="col-6">
+                        <h2 class="group-title" style="cursor: pointer">
+                        <font-awesome-icon v-if="editMode && showGroupDrag" icon="arrows-alt-v" class="action drag me-3" />
+                        <font-awesome-icon v-if="editMode" icon="times" class="action remove me-3" @click="removeGroup(group.index)" />
+                        <font-awesome-icon v-if="!this.visible[group.index]" icon="angle-down" style="padding-right: 5px;"/>
+                        <font-awesome-icon v-if="this.visible[group.index]" icon="angle-up" style="padding-right: 5px;"/>
+                        <Editable v-model="group.element.name" :contenteditable="editMode" tag="span" @click="changeVisibility(group.index)"/>
+                        </h2>
+                    </div>
+                    <div class="col-6 text-end">
+                        <span class="badge rounded-pill bg-success" style="width: 50px">
+                            {{ Object.entries($root.lastHeartbeatList).filter(r => group.element.monitorList.map(r => r.id).includes(parseInt(r[0])) && r[1].status == 1).length}}
+                        </span>
+                        <span class="badge rounded-pill bg-danger" style="margin-left: 10px;">
+                            {{ Object.entries($root.lastHeartbeatList).filter(r => group.element.monitorList.map(r => r.id).includes(parseInt(r[0])) && r[1].status == 0).length}}
+                        </span>
+                    </div>
+                </div>
                 <div class="shadow-box monitor-list mt-4 position-relative">
                     <div v-if="group.element.monitorList.length === 0" class="text-center no-monitor-msg">
                         {{ $t("No Monitors") }}
@@ -29,6 +42,7 @@
                         :disabled="!editMode"
                         :animation="100"
                         item-key="id"
+                        v-if="this.visible[group.index]"
                     >
                         <template #item="monitor">
                             <div class="item">
@@ -38,7 +52,6 @@
                                             <font-awesome-icon v-if="editMode" icon="arrows-alt-v" class="action drag me-3" />
                                             <font-awesome-icon v-if="editMode" icon="times" class="action remove me-3" @click="removeMonitor(group.index, monitor.index)" />
 
-                                            <Uptime :monitor="monitor.element" type="24" :pill="true" />
                                             <a
                                                 v-if="showLink(monitor)"
                                                 :href="monitor.element.url"
@@ -48,7 +61,8 @@
                                             >
                                                 {{ monitor.element.name }}
                                             </a>
-                                            <p v-else class="item-name"> {{ monitor.element.name }} </p>
+                                            <p v-else class="item-name"> {{ monitor.element.tags[0].name }} </p>
+                                            
                                             <span
                                                 v-if="showLink(monitor, true)"
                                                 title="Toggle Clickable Link"
@@ -62,11 +76,12 @@
                                                 />
                                             </span>
                                         </div>
-                                        <div v-if="showTags" class="tags">
-                                            <Tag v-for="tag in monitor.element.tags" :key="tag" :item="tag" :size="'sm'" />
-                                        </div>
                                     </div>
-                                    <div :key="$root.userHeartbeatBar" class="col-3 col-md-4">
+                                    <div class="col-1 col-md-1">
+                                        <Uptime :monitor="monitor.element" type="24" :pill="true" />
+                                    </div>
+                                    <div :key="$root.userHeartbeatBar" class="col-2 col-md-3">
+
                                         <HeartbeatBar size="small" :monitor-id="monitor.element.id" />
                                     </div>
                                 </div>
@@ -105,7 +120,7 @@ export default {
     },
     data() {
         return {
-
+            visible: {},
         };
     },
     computed: {
@@ -121,6 +136,15 @@ export default {
          * Remove the specified group
          * @param {number} index Index of group to remove
          */
+
+        changeVisibility(index) {
+            if (this.visible[index]) {
+                this.visible[index] = !this.visible[index];
+            } else {
+                this.visible[index] = true;
+            }
+        },
+
         removeGroup(index) {
             this.$root.publicGroupList.splice(index, 1);
         },
