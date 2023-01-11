@@ -28,7 +28,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="shadow-box monitor-list mt-4 position-relative">
+                <div class="shadow-box monitor-list mt-4 position-relative" v-if="this.visible[group.index]">
                     <div v-if="group.element.monitorList.length === 0" class="text-center no-monitor-msg">
                         {{ $t("No Monitors") }}
                     </div>
@@ -42,7 +42,6 @@
                         :disabled="!editMode"
                         :animation="100"
                         item-key="id"
-                        v-if="this.visible[group.index]"
                     >
                         <template #item="monitor">
                             <div class="item">
