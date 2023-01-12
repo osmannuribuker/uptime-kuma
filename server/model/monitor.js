@@ -354,14 +354,14 @@ class Monitor extends BeanModel {
                         }
 
                         if (data.includes(this.keyword)) {
-                            bean.msg += ", keyword is found";
+                            bean.msg += ", ";
                             bean.status = UP;
                         } else {
                             data = data.replace(/<[^>]*>?|[\n\r]|\s+/gm, " ");
                             if (data.length > 50) {
                                 data = data.substring(0, 47) + "...";
                             }
-                            throw new Error(bean.msg + ", but keyword is not in [" + data + "]");
+                            throw new Error(bean.msg + ", [" + data + "]");
                         }
 
                     }
