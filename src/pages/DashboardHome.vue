@@ -66,15 +66,6 @@
                     <p>Select system to see details.</p>
                 </div>
 
-
-                <div class="d-flex justify-content-center kuma_pagination">
-                    <pagination
-                        v-model="page"
-                        :records="importantHeartBeatList.length"
-                        :per-page="perPage"
-                        :options="paginationConfig"
-                    />
-                </div>
             </div>
         </div>
     </transition>
@@ -145,9 +136,9 @@ export default {
 
         displayedRecords() {
             if (this.$root.selectedDevice !== "") {
-                const loweredSearchText = this.$root.selectedDevice.toLowerCase();
+                const loweredSelectedLocation = this.$root.selectedDevice.toLowerCase();
                 this.filteredList = this.heartBeatList.filter(monitor => {
-                    return monitor.name.toLowerCase().includes(loweredSearchText);
+                    return monitor.name.toLowerCase() == loweredSelectedLocation ? monitor : null;
                 });
             }
             return this.filteredList;
