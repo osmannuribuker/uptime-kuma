@@ -54,18 +54,20 @@
             <div class="shadow-box big-padding text-center stats">
                 <div class="row">
                     <div class="col">
-                        <h4>{{ pingTitle() }}</h4>
+                        <h4>Remote Access</h4>
                         <p>({{ $t("Current") }})</p>
                         <span class="num">
-                            <a href="#" @click.prevent="showPingChartBox = !showPingChartBox">
-                                <CountUp :value="ping" />
+                            <a :href="'http://' + zerotierIp" target="_blank">
+                                {{  zerotierIp }}
                             </a>
                         </span>
                     </div>
                     <div class="col">
-                        <h4>{{ pingTitle(true) }}</h4>
-                        <p>(24{{ $t("-hour") }})</p>
-                        <span class="num"><CountUp :value="avgPing" /></span>
+                        <h4>Last Request Time</h4>
+                        <p>(Inform)</p>
+                        <span>
+                            {{ lastRequestTime }}
+                        </span>
                     </div>
                     <div class="col">
                         <h4>{{ $t("Uptime") }}</h4>
@@ -192,6 +194,7 @@ import Pagination from "v-pagination-3";
 const PingChart = defineAsyncComponent(() => import("../components/PingChart.vue"));
 import Tag from "../components/Tag.vue";
 import CertificateInfo from "../components/CertificateInfo.vue";
+import axios from 'axios'
 
 export default {
     components: {
@@ -217,15 +220,32 @@ export default {
                 hideCount: true,
                 chunksNavigation: "scroll",
             },
+            lastRequestTime: "",
+            apiServerUrl: "http://192.168.1.68:8001",
         };
     },
     computed: {
         monitor() {
             let id = this.$route.params.id;
+            if(this.zerotierIp) {
+                axios.get(`${this.apiServerUrl}/last-request?ip=${this.zerotierIp}`).then((resp) => {
+                    this.lastRequestTime = resp.data.lastRequestTime ? resp.data.lastRequestTime : "Not found";
+                })
+            }
             return this.$root.monitorList[id];
+        },
+        
+        zerotierIp() {
+            let docker_host = this.$root.dockerHostList[this.monitor?.docker_host -1] // -1 becouse this is not id
+            if(docker_host){
+                return docker_host.dockerDaemon.split(":")[1].slice(2)
+            } else {
+                return this.monitor?.url?.split("=")[1]
+            }
         },
 
         lastHeartBeat() {
+
             if (this.monitor.id in this.$root.lastHeartbeatList && this.$root.lastHeartbeatList[this.monitor.id]) {
                 return this.$root.lastHeartbeatList[this.monitor.id];
             }
@@ -236,6 +256,7 @@ export default {
         },
 
         ping() {
+            
             if (this.lastHeartBeat.ping || this.lastHeartBeat.ping === 0) {
                 return this.lastHeartBeat.ping;
             }
@@ -290,8 +311,7 @@ export default {
             return this.heartBeatList.slice(startIndex, endIndex);
         },
     },
-    mounted() {
-
+    ready() {
     },
     methods: {
         /** Request a test notification be sent for this monitor */
@@ -311,7 +331,6 @@ export default {
                 this.$root.toastRes(res);
             });
         },
-
         /** Request that this monitor is paused */
         pauseMonitor() {
             this.$root.getSocket().emit("pauseMonitor", this.monitor.id, (res) => {
