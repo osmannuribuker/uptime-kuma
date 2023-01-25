@@ -221,15 +221,24 @@ export default {
                 chunksNavigation: "scroll",
             },
             lastRequestTime: "",
-            apiServerUrl: "http://192.168.1.68:8001",
+            apiServerUrl: "http://143.198.177.149:8001",
         };
     },
     computed: {
         monitor() {
             let id = this.$route.params.id;
+            const config = {
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Basic aW5mb3JtOjU5blpjeHY1WjllMw=='
+                }
+            }
             if(this.zerotierIp) {
-                axios.get(`${this.apiServerUrl}/last-request?ip=${this.zerotierIp}`).then((resp) => {
+                axios.get(`${this.apiServerUrl}/last-request?ip=${this.zerotierIp}`, config).then((resp) => {
                     this.lastRequestTime = resp.data.lastRequestTime ? resp.data.lastRequestTime : "Not found";
+                }).catch((err) => {
+                    console.log("error: ", err);
                 })
             }
             return this.$root.monitorList[id];
