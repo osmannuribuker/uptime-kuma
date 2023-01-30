@@ -245,12 +245,10 @@ export default {
         },
         
         zerotierIp() {
-            let docker_host = this.$root.dockerHostList[this.monitor?.docker_host -1] // -1 becouse this is not id
-            if(docker_host){
-                return docker_host.dockerDaemon.split(":")[1].slice(2)
-            } else {
-                return this.monitor?.url?.split("=")[1]
-            }
+            let monitor_id = this.$route.params.id;
+            let selected_monitor = this.$root.monitorList[monitor_id]
+            let docker_host = this.$root.dockerHostList.find(host => host.name === selected_monitor.name);
+            return docker_host?.dockerDaemon.split(":")[1].slice(2)
         },
 
         lastHeartBeat() {
@@ -320,7 +318,7 @@ export default {
             return this.heartBeatList.slice(startIndex, endIndex);
         },
     },
-    ready() {
+    mounted() {
     },
     methods: {
         /** Request a test notification be sent for this monitor */
